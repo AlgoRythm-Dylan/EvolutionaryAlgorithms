@@ -6,7 +6,7 @@
 
         public override void Randomize()
         {
-            Number = (new Random().NextDouble() * 2000) - 1000;
+            Number = (new Random().NextDouble() * 200_000) - 100_000;
         }
     }
 }
