@@ -7,6 +7,7 @@
         public delegate Task<double> FitnessDelegate(SynthT synth);
         public FitnessDelegate Fitness { get; set; }
         public PopulationSelector<SynthT> PopulationSelector { get; set; } = new();
+        public PopulationDistribution PopulationDistribution { get; set; } = new();
 
         public World(FitnessDelegate fitnessDelegate)
         {
@@ -16,7 +17,7 @@
         public void InitializePopulation()
         {
             Population.Clear();
-            for(int i = 0; i < 10; i++)
+            for(int i = 0; i < PopulationDistribution.TotalPopulationSize; i++)
             {
                 var newSynth = new SynthT();
                 newSynth.Initialize();
@@ -48,7 +49,7 @@
                 }
                 performances.Add(performance);
             }
-            Population = PopulationSelector.Select(performances);
+            Population = PopulationSelector.Select(performances, PopulationDistribution);
             return bestScore;
         }
     }

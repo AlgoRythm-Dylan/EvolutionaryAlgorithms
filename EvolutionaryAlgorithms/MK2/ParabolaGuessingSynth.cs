@@ -15,6 +15,11 @@
                 {
                     new NumberGuessingGene(),
                     new NumberGuessingGene(),
+                    new NumberGuessingGene(),
+                    new NumberGuessingGene(),
+                    new NumberGuessingGene(),
+                    new NumberGuessingGene(),
+                    new NumberGuessingGene(),
                     new NumberGuessingGene()
                 }
             });

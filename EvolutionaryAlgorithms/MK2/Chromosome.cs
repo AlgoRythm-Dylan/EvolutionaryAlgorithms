@@ -3,14 +3,14 @@
     internal class Chromosome
     {
         public List<Gene> Genes { get; set; } = new();
-        protected static void ValidateCrossovers(params Chromosome[] chromosomes)
+        protected static void ValidateCrossovers(params List<Chromosome> chromosomes)
         {
-            if (chromosomes.Length == 0)
+            if (chromosomes.Count == 0)
             {
                 throw new InvalidDataException("At least one chromosome required");
             }
             int geneCount = chromosomes[0].Genes.Count;
-            for(int i = 1; i < chromosomes.Length; i++)
+            for(int i = 1; i < chromosomes.Count; i++)
             {
                 if (chromosomes[i].Genes.Count != geneCount)
                 {
@@ -18,7 +18,7 @@
                 }
             }
         }
-        public static Chromosome Crossover(params Chromosome[] chromosomes)
+        public static Chromosome Crossover(params List<Chromosome> chromosomes)
         {
             ValidateCrossovers(chromosomes);
 
@@ -27,7 +27,7 @@
             var random = new Random();
             for(int i = 0; i < geneCount; i++)
             {
-                result.Genes[i] = chromosomes[random.Next(chromosomes.Length - 1)].Genes[i];
+                result.Genes.Add(chromosomes[random.Next(chromosomes.Count - 1)].Genes[i].Clone());
             }
             return result;
         }

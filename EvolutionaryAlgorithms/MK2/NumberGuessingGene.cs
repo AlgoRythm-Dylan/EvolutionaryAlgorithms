@@ -8,5 +8,11 @@
         {
             Number = (new Random().NextDouble() * 200_000) - 100_000;
         }
+        public override Gene Clone()
+        {
+            var clone = new NumberGuessingGene();
+            clone.Number = Number;
+            return clone;
+        }
     }
 }
