@@ -3,6 +3,7 @@
     internal class ParabolaGuessingSynth : ISynth
     {
         private const int NUMBER_GUESS_CHROMOSOME_INDEX = 0;
+        public string ID { get; set; } = Guid.NewGuid().ToString();
         public List<Chromosome> Chromosomes { get; set; } = new();
 
         public void Initialize()

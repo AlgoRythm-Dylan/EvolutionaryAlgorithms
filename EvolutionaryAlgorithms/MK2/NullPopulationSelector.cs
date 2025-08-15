@@ -3,7 +3,7 @@
     internal class NullPopulationSelector<SynthT> : PopulationSelector<SynthT>
         where SynthT : class, ISynth, new()
     {
-        public override List<SynthT> Select(List<FitnessRecord<SynthT>> generation, PopulationDistribution distribution)
+        public override List<SynthT> Select(List<FitnessRecord<SynthT>> generation, PopulationDistribution distribution, MutationConfiguration c)
         {
             // Just return new synths
             List<SynthT> nextGeneration = new();

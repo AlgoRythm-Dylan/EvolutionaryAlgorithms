@@ -22,5 +22,25 @@
             }
             return child;
         }
+        public static void MutateGenes(this ISynth synth, MutationConfiguration config)
+        {
+            foreach(var chromosome in synth.Chromosomes)
+            {
+                foreach(var gene in chromosome.Genes)
+                {
+                    gene.Mutate(config);
+                }
+            }
+        }
+        public static SynthT CloneChromosomes<SynthT>(this ISynth synth)
+            where SynthT : class, ISynth, new()
+        {
+            var clone = new SynthT();
+            foreach(var chromosome in synth.Chromosomes)
+            {
+                clone.Chromosomes.Add(chromosome.Clone());
+            }
+            return clone;
+        }
     }
 }

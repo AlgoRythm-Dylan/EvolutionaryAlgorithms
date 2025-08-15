@@ -8,6 +8,7 @@
         public FitnessDelegate Fitness { get; set; }
         public PopulationSelector<SynthT> PopulationSelector { get; set; } = new();
         public PopulationDistribution PopulationDistribution { get; set; } = new();
+        public MutationConfiguration MutationConfiguration { get; set; } = new();
 
         public World(FitnessDelegate fitnessDelegate)
         {
@@ -49,7 +50,7 @@
                 }
                 performances.Add(performance);
             }
-            Population = PopulationSelector.Select(performances, PopulationDistribution);
+            Population = PopulationSelector.Select(performances, PopulationDistribution, MutationConfiguration);
             return bestScore;
         }
     }

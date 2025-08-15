@@ -1,4 +1,6 @@
-﻿namespace MK2
+﻿using System.Runtime.CompilerServices;
+
+namespace MK2
 {
     internal class Chromosome
     {
@@ -17,6 +19,15 @@
                     throw new InvalidDataException("All chromosomes must have the same number of genes");
                 }
             }
+        }
+        public Chromosome Clone()
+        {
+            Chromosome clone = new();
+            foreach (var gene in Genes)
+            {
+                clone.Genes.Add(gene.Clone());
+            }
+            return clone;
         }
         public static Chromosome Crossover(params List<Chromosome> chromosomes)
         {

@@ -14,5 +14,14 @@
             clone.Number = Number;
             return clone;
         }
+        public override void Mutate(MutationConfiguration config)
+        {
+            var rand = new Random();
+            if(rand.NextDouble() >= config.MutationRate)
+            {
+                double mutationValue = (rand.NextDouble() - 0.5) * config.MutationStrength;
+                Number += Number * mutationValue;
+            }
+        }
     }
 }

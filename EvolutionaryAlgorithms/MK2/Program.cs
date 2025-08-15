@@ -24,6 +24,17 @@
  * (and its effects) if needed.
  * 
  * Interface is now async-first. This just makes sense.
+ * 
+ * The selection is done by trying to keep well-performing
+ * synths around and crossing them over and cloning them
+ * plus a few mutations. This system ultimately works, but
+ * cannot beat it's comparison: generating 6 random numbers.
+ * 
+ * This is partially because my selection process is bad,
+ * but also because 0 is the goal and 6 randomly generated
+ * numbers will likely sum to 0, so the random population is
+ * unnaturally skilled at this task. MK3 will hope to address
+ * both of these issues.
  */
 
 namespace MK2
@@ -32,19 +43,46 @@ namespace MK2
     {
         public static async Task Main(string[] args)
         {
+            await RunTheNumbers();
+        }
+        private static async Task RunTheNumbers()
+        {
+            List<double> nullSelectorResults = new();
+            List<double> naturalSelectorResults = new();
+            for (int i = 0; i < 50; i++)
+            {
+                nullSelectorResults.Add(await Simulate(true));
+                naturalSelectorResults.Add(await Simulate());
+            }
+            Console.WriteLine("Results after 50 simulations of each:");
+            Console.WriteLine($"Null selector average score: {nullSelectorResults.Average()}");
+            Console.WriteLine($"Natural selector average score: {naturalSelectorResults.Average()}");
+
+            Console.WriteLine($"Null selector best score: {nullSelectorResults.Max()}");
+            Console.WriteLine($"Natural selector best score: {naturalSelectorResults.Max()}");
+
+            Console.WriteLine($"Null selector worst score: {nullSelectorResults.Min()}");
+            Console.WriteLine($"Natural selector worst score: {naturalSelectorResults.Min()}");
+        }
+        private static async Task<double> Simulate(bool nullSelector = false, double? mininumFitness = null)
+        {
             var world = new World<ParabolaGuessingSynth>(async synth =>
             {
                 return -Math.Pow(synth.SumNumberGenes() / 10, 2);
             });
-            world.PopulationSelector = new NullPopulationSelector<ParabolaGuessingSynth>();
+            if (nullSelector)
+            {
+                world.PopulationSelector = new NullPopulationSelector<ParabolaGuessingSynth>();
+            }
+            world.PopulationDistribution.MinimumFitness = mininumFitness;
             world.InitializePopulation();
 
             bool firstFlag = true;
             double bestScore = 0;
             int count = 0;
-            while(count < 25)
+            while (count < 10)
             {
-                if(firstFlag)
+                if (firstFlag)
                 {
                     firstFlag = false;
                     bestScore = await world.Step();
@@ -53,10 +91,9 @@ namespace MK2
                 {
                     bestScore = Math.Max(bestScore, await world.Step());
                 }
-                Console.WriteLine($"Generation #{world.Generation} best score: {bestScore}");
                 count++;
             }
-            Console.WriteLine($"Simulation finished after {world.Generation} generation(s). Best score: {bestScore}");
+            return bestScore;
         }
     }
 }
