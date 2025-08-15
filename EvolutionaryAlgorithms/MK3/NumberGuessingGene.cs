@@ -8,7 +8,7 @@ namespace MK3
 
         public void Randomize()
         {
-            Number = (new Random().NextDouble() * 200_000) - 100_000;
+            Number = (new Random().NextDouble() * 10) - 5;
         }
         public static NumberGuessingGene DifferentialCrossover(NumberGuessingGene a,
                                                                NumberGuessingGene b,

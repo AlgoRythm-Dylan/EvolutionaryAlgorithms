@@ -12,7 +12,7 @@ namespace MK3.DifferentialEvolution
             List<FitnessRecord<TSynth>> nextGen = new();
 
             bool firstRunFlag = true;
-            double maxFitness = 0;
+            double bestFitness = 0;
             for(int i = 0; i < world.Population.Count; i++)
             {
                 var parent = world.Population[i];
@@ -21,7 +21,7 @@ namespace MK3.DifferentialEvolution
                 var childFitness = await world.Fitness(child);
 
                 double thisGenerationFitnenss = 0;
-                if(childFitness > parent.Fitness)
+                if(childFitness < parent.Fitness)
                 {
                     thisGenerationFitnenss = childFitness;
                     nextGen.Add(new(childFitness, child));
@@ -34,16 +34,16 @@ namespace MK3.DifferentialEvolution
                 if (firstRunFlag)
                 {
                     firstRunFlag = false;
-                    maxFitness = thisGenerationFitnenss;
+                    bestFitness = thisGenerationFitnenss;
                 }
                 else
                 {
-                    maxFitness = Math.Max(maxFitness, thisGenerationFitnenss);
+                    bestFitness = Math.Min(bestFitness, thisGenerationFitnenss);
                 }
             }
 
             world.Population = nextGen;
-            return maxFitness;
+            return bestFitness;
         }
         public List<TSynth> GetDistinctSynths(TSynth notThisOne, World<TSynth> world, int count = 3)
         {

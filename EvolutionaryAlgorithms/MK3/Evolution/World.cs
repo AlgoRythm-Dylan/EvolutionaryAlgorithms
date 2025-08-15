@@ -37,7 +37,7 @@
                 }
                 else
                 {
-                    bestFitness = Math.Max(bestFitness, fitness);
+                    bestFitness = Math.Min(bestFitness, fitness);
                 }
 
                 Population.Add(new(fitness, synth));

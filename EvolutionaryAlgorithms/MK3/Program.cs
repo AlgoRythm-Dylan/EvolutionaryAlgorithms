@@ -36,13 +36,13 @@ namespace MK3
         static async Task Main(string[] args)
         {
 
-            World<ParabolaGuessingSynth>.FitnessDelegate fitness = async synth =>
+            World<AckleyGuessingSynth>.FitnessDelegate fitness = async synth =>
             {
-                return -Math.Pow(synth.SumNumberGenes() / 10, 2);
+                return BenchmarkFunctions.Ackley2D(synth.NumberGuessingChromosome.Genes[0].Number, synth.NumberGuessingChromosome.Genes[1].Number);
             };
-            var simulator = new DEGenerationSimulator<ParabolaGuessingSynth>();
+            var simulator = new DEGenerationSimulator<AckleyGuessingSynth>();
 
-            var world = new World<ParabolaGuessingSynth>(fitness, simulator);
+            var world = new World<AckleyGuessingSynth>(fitness, simulator);
             var startingFitness = await world.InitializePopulation();
             Console.WriteLine($"Starting fitness: {startingFitness}");
             for(int i = 0; i < 100; i++)
@@ -50,6 +50,8 @@ namespace MK3
                 var thisGenerationFitness = await world.Simulate();
                 Console.WriteLine($"Fitness after generation {world.Generation}: {thisGenerationFitness}");
             }
+            var bestFit = world.Population.OrderBy(synth => synth.Fitness).First();
+            Console.WriteLine($"Coordinates of best fit: ({bestFit.Synth.NumberGuessingChromosome.Genes[0].Number}, {bestFit.Synth.NumberGuessingChromosome.Genes[1].Number})");
         }
     }
 }

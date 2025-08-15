@@ -4,16 +4,12 @@ using System.Diagnostics;
 
 namespace MK3
 {
-    internal class ParabolaGuessingSynth : ISynth, IDESynth
+    internal class AckleyGuessingSynth : ISynth, IDESynth
     {
         public Chromosome<NumberGuessingGene> NumberGuessingChromosome { get; set; } = new();
-        public ParabolaGuessingSynth()
+        public AckleyGuessingSynth()
         {
             NumberGuessingChromosome.Genes = [
-                    new NumberGuessingGene(),
-                    new NumberGuessingGene(),
-                    new NumberGuessingGene(),
-                    new NumberGuessingGene(),
                     new NumberGuessingGene(),
                     new NumberGuessingGene()
                 ];
@@ -26,14 +22,9 @@ namespace MK3
             }
         }
 
-        public double SumNumberGenes()
-        {
-            return NumberGuessingChromosome.Genes.Sum(gene => gene.Number);
-        }
-
         public ISynth Clone()
         {
-            var clone = new ParabolaGuessingSynth();
+            var clone = new AckleyGuessingSynth();
             clone.NumberGuessingChromosome.Genes.Clear();
             foreach(var gene in NumberGuessingChromosome.Genes)
             {
@@ -44,14 +35,14 @@ namespace MK3
 
         public ISynth DifferentialCrossover(ISynth a, ISynth b, ISynth c, Random RNG, DEParams deParams)
         {
-            var synthA = a as ParabolaGuessingSynth;
-            var synthB = a as ParabolaGuessingSynth;
-            var synthC = a as ParabolaGuessingSynth;
+            var synthA = a as AckleyGuessingSynth;
+            var synthB = a as AckleyGuessingSynth;
+            var synthC = a as AckleyGuessingSynth;
             if(a is null || b is null || c is null)
             {
                 throw new InvalidCastException("Cannot cast provided ISynth to ParabolaGuessingSynth");
             }
-            var child = (ParabolaGuessingSynth)Clone();
+            var child = (AckleyGuessingSynth)Clone();
             int guaranteedMutation = RNG.Next(synthA.NumberGuessingChromosome.Genes.Count);
             for(int i = 0; i < synthA.NumberGuessingChromosome.Genes.Count; i++)
             {
