@@ -1,4 +1,4 @@
-﻿namespace MK3
+﻿namespace MK3.Evolution
 {
     internal class Chromosome<TGene>
         where TGene : class, IGene, new()
