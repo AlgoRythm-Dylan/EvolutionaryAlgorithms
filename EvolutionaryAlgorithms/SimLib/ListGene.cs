@@ -6,9 +6,9 @@
 
         public List<TEntity> List { get; set; } = new();
 
-        public void Randomize()
+        public void Randomize(Random RNG)
         {
-            Backend.Randomize();
+            Backend.Randomize(RNG);
         }
 
         public IGene Clone()

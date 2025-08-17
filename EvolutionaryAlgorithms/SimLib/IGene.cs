@@ -2,7 +2,7 @@
 {
     public interface IGene
     {
-        public void Randomize();
+        public void Randomize(Random RNG);
         public IGene Clone();
     }
 }

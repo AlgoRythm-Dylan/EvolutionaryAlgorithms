@@ -6,7 +6,7 @@
         public JADEParams JADEParams { get; set; } = new();
         public double CurrentCrossoverProbability { get; set; } = 0;
         public double CurrentDifferentialWeight { get; set; } = 0;
-        public bool Paralellize { get; set; } = true;
+        public bool Parallelize { get; set; } = true;
 
         private bool FirstRunFlag = true;
         private List<TSynth> Archive { get; set; } = new();
@@ -24,7 +24,7 @@
                 world.Population = world.Population.OrderBy(synth => synth.Fitness).ToList();
             }
 
-            return await (Paralellize ? SimulateGenerationParallel(world) : SimulateGenerationSync(world));
+            return await (Parallelize ? SimulateGenerationParallel(world) : SimulateGenerationSync(world));
         }
 
         private async Task<double> SimulateGenerationSync(World<TSynth> world)
@@ -53,7 +53,7 @@
                     nextGen.Add(new(childFitness, child));
                     successCRSum += thisCR;
                     successCRCount++;
-                    successWeightSum += 0;
+                    successWeightSum += thisWeight;
                     successWeightCount++;
                     AddToArchive(parent.Synth, world.Population.Count);
                 }
@@ -62,12 +62,16 @@
                     thisGenerationFitness = parent.Fitness;
                     nextGen.Add(parent);
                 }
-                bestFitness.Update(Math.Min(childFitness, parent.Fitness));
+                bestFitness.Update(thisGenerationFitness);
             }
 
             if (successCRCount > 0)
             {
                 CurrentCrossoverProbability = successCRSum / successCRCount;
+            }
+            if (successWeightCount > 0)
+            {
+                CurrentDifferentialWeight = successWeightSum / successWeightCount;
             }
             world.Population = nextGen;
             return bestFitness.GetBest();
@@ -75,7 +79,60 @@
 
         private async Task<double> SimulateGenerationParallel(World<TSynth> world)
         {
-            return 0;
+            // For async workflow, the next gen should be initialized. We can use the old gen.
+            List<FitnessRecord<TSynth>> nextGen = [ .. world.Population ];
+
+            double[] fitnesses = new double[world.Population.Count];
+            SimulationReport[] crResults = new SimulationReport[world.Population.Count];
+            SimulationReport[] weightResults = new SimulationReport[world.Population.Count];
+            TSynth[] archiveList = new TSynth[world.Population.Count];
+
+            await Parallel.ForAsync(0, world.Population.Count,
+                                    new ParallelOptions { MaxDegreeOfParallelism = Environment.ProcessorCount },
+                                    async (i, cancellationToken) =>
+            {
+                var parent = world.Population[i];
+                var twoRandomSynths = JADEParams.UseArchive ? GetDistinctSynthsPlusArchive(parent.Synth, world) : GetDistinctSynths(parent.Synth, world);
+                var topPerformer = GetRandomTopSynth(world, JADEParams.TopPercentageSynth);
+                double thisCR = NextCR(world.RNG, CurrentCrossoverProbability);
+                double thisWeight = NextCauchy(world.RNG, CurrentDifferentialWeight);
+                var child = (TSynth)parent.Synth.JADECrossover(parent.Synth, topPerformer, twoRandomSynths[0], twoRandomSynths[1], world.RNG, CurrentCrossoverProbability, CurrentDifferentialWeight);
+                var childFitness = await world.Fitness(child);
+
+                double thisGenerationFitness = 0;
+                if (childFitness < parent.Fitness)
+                {
+                    thisGenerationFitness = childFitness;
+                    nextGen[i] = new(childFitness, child);
+                    crResults[i] = new() { SuccessValue = thisCR, WasSuccess = true };
+                    weightResults[i] = new() { SuccessValue = thisWeight, WasSuccess = true };
+                    archiveList[i] = parent.Synth;
+                }
+                else
+                {
+                    thisGenerationFitness = parent.Fitness;
+                    crResults[i] = new() { WasSuccess = false };
+                    weightResults[i] = new() { WasSuccess = false };
+                }
+                fitnesses[i] = thisGenerationFitness;
+            });
+
+            if(crResults.AnySuccess())
+            {
+                CurrentCrossoverProbability = crResults.SuccessfulAverage();
+                CurrentDifferentialWeight = weightResults.SuccessfulAverage();
+                // Add all valid archive guys to the archive
+                for(int i = 0; i < world.Population.Count; i++)
+                {
+                    if (crResults[i].WasSuccess)
+                    {
+                        AddToArchive(archiveList[i], world.Population.Count);
+                    }
+                }
+            }
+
+            world.Population = nextGen;
+            return fitnesses.Min();
         }
 
         private List<TSynth> GetDistinctSynths(TSynth notThisOne, World<TSynth> world, int count = 2)

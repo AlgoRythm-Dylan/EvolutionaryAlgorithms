@@ -49,7 +49,7 @@ namespace MK4.JADE
                     nextGen.Add(new(childFitness, child));
                     successCRSum += thisCR;
                     successCRCount++;
-                    successWeightSum += 0;
+                    successWeightSum += thisWeight;
                     successWeightCount++;
                     AddToArchive(parent.Synth, world.Population.Count);
                 }
@@ -73,6 +73,10 @@ namespace MK4.JADE
             if(successCRCount > 0)
             {
                 CurrentCrossoverProbability = successCRSum / successCRCount;
+            }
+            if (successWeightCount > 0)
+            {
+                CurrentDifferentialWeight = successWeightSum / successWeightCount;
             }
             world.Population = nextGen;
             return bestFitness;

@@ -2,7 +2,7 @@
 {
     public interface ISynth
     {
-        public void InitializeRandomly();
+        public void InitializeRandomly(Random RNG);
         public ISynth Clone();
     }
 }

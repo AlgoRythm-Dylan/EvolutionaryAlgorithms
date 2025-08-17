@@ -13,6 +13,7 @@
             if (IsFirstItem)
             {
                 Best = candidate;
+                IsFirstItem = false;
             }
             else
             {

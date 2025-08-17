@@ -10,7 +10,17 @@
         public int TargetPopulationSize { get; set; } = 100;
         public FitnessDelegate Fitness { get; set; }
         public IGenerationSimulator<TSynth> Simulator { get; set; }
-        public Random RNG { get; set; } = new Random();
+
+        private ThreadLocal<Random> ThreadLocalRandom = new ThreadLocal<Random>(
+            () => {
+                // Use a thread-safe seed source
+                return new Random(Guid.NewGuid().GetHashCode());
+            }
+        );
+        public Random RNG
+        {
+            get => ThreadLocalRandom.Value;
+        }
 
         public World(FitnessDelegate fitness, IGenerationSimulator<TSynth> simulator)
         {
@@ -25,7 +35,7 @@
             for (int i = 0; i < TargetPopulationSize; i++)
             {
                 var synth = new TSynth();
-                synth.InitializeRandomly();
+                synth.InitializeRandomly(RNG);
                 double fitness = await Fitness(synth);
 
                 if (firstRunFlag)
