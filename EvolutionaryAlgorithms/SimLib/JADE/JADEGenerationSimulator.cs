@@ -6,8 +6,11 @@
         public JADEParams JADEParams { get; set; } = new();
         public double CurrentCrossoverProbability { get; set; } = 0;
         public double CurrentDifferentialWeight { get; set; } = 0;
+        public bool Paralellize { get; set; } = true;
+
         private bool FirstRunFlag = true;
         private List<TSynth> Archive { get; set; } = new();
+
         public async Task<double> SimulateGeneration(World<TSynth> world)
         {
             if (FirstRunFlag)
@@ -20,10 +23,14 @@
             {
                 world.Population = world.Population.OrderBy(synth => synth.Fitness).ToList();
             }
-            List<FitnessRecord<TSynth>> nextGen = new();
 
-            bool firstLoopFlag = true;
-            double bestFitness = 0;
+            return await (Paralellize ? SimulateGenerationParallel(world) : SimulateGenerationSync(world));
+        }
+
+        private async Task<double> SimulateGenerationSync(World<TSynth> world)
+        {
+            List<FitnessRecord<TSynth>> nextGen = new();
+            BestItemTracker<double> bestFitness = new();
             double successCRSum = 0;
             int successCRCount = 0;
             double successWeightSum = 0;
@@ -55,24 +62,20 @@
                     thisGenerationFitness = parent.Fitness;
                     nextGen.Add(parent);
                 }
-                if (firstLoopFlag)
-                {
-                    firstLoopFlag = false;
-                    bestFitness = thisGenerationFitness;
-                }
-                else
-                {
-                    bestFitness = Math.Min(bestFitness, thisGenerationFitness);
-                }
-
+                bestFitness.Update(Math.Min(childFitness, parent.Fitness));
             }
 
-            if(successCRCount > 0)
+            if (successCRCount > 0)
             {
                 CurrentCrossoverProbability = successCRSum / successCRCount;
             }
             world.Population = nextGen;
-            return bestFitness;
+            return bestFitness.GetBest();
+        }
+
+        private async Task<double> SimulateGenerationParallel(World<TSynth> world)
+        {
+            return 0;
         }
 
         private List<TSynth> GetDistinctSynths(TSynth notThisOne, World<TSynth> world, int count = 2)

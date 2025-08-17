@@ -4,8 +4,9 @@
  * 
  * Additionally, SimLib will run multi-threaded
  * 
- * 
  */
+
+using SimLib;
 
 namespace MK5
 {
@@ -13,7 +14,7 @@ namespace MK5
     {
         static void Main(string[] args)
         {
-            Console.WriteLine("Hello, World!");
+            
         }
     }
 }
